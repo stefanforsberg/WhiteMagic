@@ -14,7 +14,7 @@ namespace WhiteMagic.Tests
 {
     public class InMemoryContentRepository : IContentRepository
     {
-        private readonly IContainer _container;
+        private readonly Func<Type, IContentData> _activator;
         private readonly IInmemoryPermantentLinkMapper _permanentLinkMapper;
 
         private readonly Dictionary<PageReference, List<PageData>> _pages = new Dictionary<PageReference, List<PageData>>();
@@ -22,9 +22,9 @@ namespace WhiteMagic.Tests
 
         private int _pageId = 3;
 
-        public InMemoryContentRepository(IContainer container, IInmemoryPermantentLinkMapper permanentLinkMapper)
+        public InMemoryContentRepository(Func<Type, IContentData> activator, IInmemoryPermantentLinkMapper permanentLinkMapper)
         {
-            _container = container;
+            _activator = activator;
             _permanentLinkMapper = permanentLinkMapper;
         }
 
@@ -432,7 +432,8 @@ namespace WhiteMagic.Tests
         private TPageData ConstructContentData<TPageData>(string pageName, PageReference pageLink, PageReference parentLink, String language)
             where TPageData : IContentData
         {
-            var page = _container.GetInstance<TPageData>();
+            var page = _activator.Invoke(typeof(TPageData));
+            
             page.Property.Add(new PropertyString() { Name = "PageName" });
             page.Property.Add(new PropertyDate() { Name = "PageStartPublish" });
             page.Property.Add(new PropertyDate() { Name = "PageStopPublish" });
@@ -461,7 +462,7 @@ namespace WhiteMagic.Tests
                 InitBlocks(page as PageData);
             }
 
-            return page;
+            return (TPageData)page;
         }
 
         private void AddPageDataProperties(PageData page, string pageName, PageReference pageLink, PageReference parentLink)
@@ -478,19 +479,21 @@ namespace WhiteMagic.Tests
 
         private void InitBlocks(object page)
         {
-            foreach (var property in page.GetType().GetProperties())
+            var blockProperties = page
+                .GetType().
+                GetProperties().
+                Where(p => p.PropertyType.IsSubclassOf(typeof (BlockData)));
+
+            foreach (var property in blockProperties)
             {
-                if (property.PropertyType.IsSubclassOf(typeof(BlockData)))
+                var block = _activator.Invoke(property.PropertyType);
+
+                if (property.CanWrite)
                 {
-                    var block = _container.GetInstance(property.PropertyType);
-
-                    if (property.CanWrite)
-                    {
-                        property.SetValue(page, block, null);
-                    }
-
-                    InitBlocks(block);
+                    property.SetValue(page, block, null);
                 }
+
+                InitBlocks(block);
             }
         }
 
