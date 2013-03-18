@@ -20,8 +20,7 @@ namespace WhiteMagic.Tests.ContentRepository
             base.Given();
 
             _startPage = ContentRepository
-                .GetDefault<StartPage>(ContentReference.RootPage)
-                .SaveAndPublish(ContentRepository);
+                .Publish<StartPage>(ContentReference.RootPage);
 
             _oldParent = ContentRepository
                 .GetDefault<StartPage>(_startPage.PageLink)

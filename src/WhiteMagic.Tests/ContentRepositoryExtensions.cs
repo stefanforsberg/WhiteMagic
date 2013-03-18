@@ -11,6 +11,19 @@ namespace WhiteMagic.Tests
         public static readonly Guid RootPageGuid = new Guid("945D02B0-B744-4349-A995-87CE3FCD51F4");
         public static readonly Guid WasteBasketGuid = new Guid("27D4C717-4ABC-4DC4-B3A1-5008F311E301");
 
+        public static T Publish<T>(this IContentRepository contentRepository, ContentReference parent, string pageName = "") where T : IContent
+        {
+            return contentRepository.Publish<T>(parent, p => p.Name = pageName);
+        }
+
+        public static T Publish<T>(this IContentRepository contentRepository, ContentReference parent, Action<T> setValues) where T : IContent
+        {
+            return contentRepository
+                .GetDefault<T>(parent)
+                .With(setValues)
+                .SaveAndPublish(contentRepository);
+        }
+
         public static void CreateSystemPages(this IContentRepository contentRepository)
         {
             var rootPage = new PageData();

@@ -18,20 +18,11 @@ namespace WhiteMagic.Tests.ContentRepository
         {
             base.Given();
 
-            _startPage = ContentRepository.GetDefaultPageData<StartPage>(ContentReference.RootPage);
-            ContentRepository.Save(_startPage, SaveAction.Publish, AccessLevel.NoAccess);
+            _startPage = ContentRepository.Publish<StartPage>(ContentReference.RootPage);
 
-            var childPage1 = ContentRepository.GetDefaultPageData<StartPage>(_startPage.PageLink);
-            childPage1.PageName = "ChildPage1";
-            ContentRepository.Save(childPage1, SaveAction.Publish, AccessLevel.NoAccess);
-
-            var childPage2 = ContentRepository.GetDefaultPageData<StartPage>(_startPage.PageLink);
-            childPage2.PageName = "ChildPage2";
-            ContentRepository.Save(childPage2, SaveAction.Publish, AccessLevel.NoAccess);
-
-            var childPage3 = ContentRepository.GetDefaultPageData<StandardPage>(_startPage.PageLink);
-            childPage3.PageName = "ChildPage3";
-            ContentRepository.Save(childPage3, SaveAction.Publish, AccessLevel.NoAccess);
+            ContentRepository.Publish<StartPage>(_startPage.PageLink, "ChildPage1");
+            ContentRepository.Publish<StartPage>(_startPage.PageLink, "ChildPage2");
+            ContentRepository.Publish<StandardPage>(_startPage.PageLink, "ChildPage3");
         }
 
         public override void When()
