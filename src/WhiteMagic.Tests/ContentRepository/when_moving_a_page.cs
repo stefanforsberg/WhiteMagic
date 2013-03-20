@@ -29,7 +29,7 @@ namespace WhiteMagic.Tests.ContentRepository
                         p.PageName = "OldParent";
                         p.LinkURL = "oldparent";
                     })
-                .SaveAndPublish(ContentRepository);
+                .Publish(ContentRepository);
 
             _newParent = ContentRepository.GetDefault<StartPage>(_startPageReference);
             _newParent.PageName = "NewParent";

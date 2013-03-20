@@ -51,7 +51,7 @@ namespace WhiteMagic.Tests
 
         public T CreateLanguageBranch<T>(ContentReference contentLink, ILanguageSelector languageSelector, AccessLevel access) where T : IContentData
         {
-            return EnsureTOrNull<T>(CreateLanguageBranch(contentLink.ToPageReference(), languageSelector, access));
+            return CreateLanguageBranch<T>(contentLink.ToPageReference(), languageSelector, access);
         }
 
         public ContentReference Copy(ContentReference source, ContentReference destination, AccessLevel requiredSourceAccess, AccessLevel requiredDestinationAccess, bool publishOnDestination)
@@ -170,18 +170,25 @@ namespace WhiteMagic.Tests
 
         #endregion
 
-        public PageData CreateLanguageBranch(PageReference pageLink, ILanguageSelector selector, AccessLevel access)
+        public T CreateLanguageBranch<T>(PageReference pageLink, ILanguageSelector selector, AccessLevel access) where T : IContentData
         {
             PageData masterPage = GetPage(pageLink);
 
-            LanguageSelectorContext ls = new LanguageSelectorContext(masterPage);
+            LanguageSelectorContext ls = new LanguageSelectorContext(masterPage, new InMemoryLanguageBranchRepository(),Get<IContent>);
             selector.LoadLanguage(ls);
-            PageData pageData = ConstructContentData<PageData>(masterPage.PageName, masterPage.PageLink, masterPage.ParentLink, ls.SelectedLanguage);
+            var pageData = ConstructContentData<T>(masterPage.PageName, masterPage.PageLink, masterPage.ParentLink, ls.SelectedLanguage);
             List<String> languages = new List<string>(masterPage.PageLanguages);
             languages.Add(ls.SelectedLanguage);
-            pageData.InitializeData(languages);
-            pageData.PageGuid = masterPage.PageGuid;
-            pageData.PageLink.ID = masterPage.PageLink.ID;
+            
+            if (pageData is PageData)
+            {
+                var p = pageData as PageData;
+
+                p.InitializeData(languages);
+                p.PageGuid = masterPage.PageGuid;
+                p.PageLink.ID = masterPage.PageLink.ID;
+            }
+            
             return pageData;
         }
 
