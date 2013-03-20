@@ -404,7 +404,7 @@ namespace WhiteMagic.Tests
             {
                 throw new PageNotFoundException(pageLink);
             }
-            return pages.Last();
+            return pages.Last().Copy();
         }
 
         private void RaisePageEvent(PageEventHandler pageEvent, PageEventArgs e)

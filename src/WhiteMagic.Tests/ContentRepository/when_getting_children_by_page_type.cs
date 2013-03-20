@@ -11,24 +11,25 @@ namespace WhiteMagic.Tests.ContentRepository
 {
     public class when_getting_children_by_page_type : TestBase
     {
-        StartPage _startPage;
+        
         IEnumerable<StartPage> _children;
+        private PageReference _startPageReference;
 
         public override void Given()
         {
             base.Given();
 
-            _startPage = ContentRepository.Publish<StartPage>(ContentReference.RootPage);
+            _startPageReference = ContentRepository.Publish<StartPage>(ContentReference.RootPage);
 
-            ContentRepository.Publish<StartPage>(_startPage.PageLink, "ChildPage1");
-            ContentRepository.Publish<StartPage>(_startPage.PageLink, "ChildPage2");
-            ContentRepository.Publish<StandardPage>(_startPage.PageLink, "ChildPage3");
+            ContentRepository.Publish<StartPage>(_startPageReference, "ChildPage1");
+            ContentRepository.Publish<StartPage>(_startPageReference, "ChildPage2");
+            ContentRepository.Publish<StandardPage>(_startPageReference, "ChildPage3");
         }
 
         public override void When()
         {
             base.When();
-            _children = ContentRepository.GetChildren<StartPage>(_startPage.PageLink);
+            _children = ContentRepository.GetChildren<StartPage>(_startPageReference);
         }
 
         [Test]

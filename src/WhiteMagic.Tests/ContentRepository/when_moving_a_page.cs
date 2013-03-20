@@ -10,20 +10,20 @@ namespace WhiteMagic.Tests.ContentRepository
 {
     public class when_moving_a_page : TestBase
     {
-        StartPage _startPage;
-        StartPage _oldParent;
         StartPage _newParent;
         StartPage _pageToMove;
+        private PageReference _startPageReference;
+        private PageReference _oldParentReference;
 
         public override void Given()
         {
             base.Given();
 
-            _startPage = ContentRepository
+            _startPageReference = ContentRepository
                 .Publish<StartPage>(ContentReference.RootPage);
 
-            _oldParent = ContentRepository
-                .GetDefault<StartPage>(_startPage.PageLink)
+            _oldParentReference = ContentRepository
+                .GetDefault<StartPage>(_startPageReference)
                 .With(p =>
                     {
                         p.PageName = "OldParent";
@@ -31,12 +31,12 @@ namespace WhiteMagic.Tests.ContentRepository
                     })
                 .SaveAndPublish(ContentRepository);
 
-            _newParent = ContentRepository.GetDefault<StartPage>(_startPage.PageLink);
+            _newParent = ContentRepository.GetDefault<StartPage>(_startPageReference);
             _newParent.PageName = "NewParent";
             _newParent.LinkURL = "newparent";
             ContentRepository.Save(_newParent, SaveAction.Publish, AccessLevel.NoAccess);
 
-            _pageToMove = ContentRepository.GetDefault<StartPage>(_oldParent.PageLink);
+            _pageToMove = ContentRepository.GetDefault<StartPage>(_oldParentReference);
             _pageToMove.PageName = "PageToMove";
             ContentRepository.Save(_pageToMove, SaveAction.Publish, AccessLevel.NoAccess);
         }
@@ -66,7 +66,7 @@ namespace WhiteMagic.Tests.ContentRepository
         public void it_should_not_be_returned_when_getting_children_for_old_parent()
         {
             ContentRepository
-                .GetChildren<StartPage>(_oldParent.PageLink)
+                .GetChildren<StartPage>(_oldParentReference)
                 .ShouldNotContain(p => p.PageName == "PageToMove");
                 
         }

@@ -7,20 +7,21 @@ namespace WhiteMagic.Tests.ContentRepository
 {
     public class when_saving_a_page : TestBase
     {
-        private StartPage _startPage;
         private StartPage _loadedPage;
+        private PageReference _startPageReference;
 
         public override void Given()
         {
             base.Given();
-            _startPage = ContentRepository
+            _startPageReference = ContentRepository
                 .Publish<StartPage>(ContentReference.RootPage, p => p.MainBody = "Hejhej!");
         }
 
         public override void When()
         {
             base.When();
-            _loadedPage = ContentRepository.Get<StartPage>(_startPage.PageLink); 
+
+            _loadedPage = ContentRepository.Get<StartPage>(_startPageReference); 
         }
 
         [Test]
@@ -29,5 +30,34 @@ namespace WhiteMagic.Tests.ContentRepository
             _loadedPage.MainBody.ShouldBe("Hejhej!");
         }
 
+    }
+
+    public class when_editing_an_existing_page_without_saving_it : TestBase
+    {
+        private PageReference _startPageReference;
+
+        public override void Given()
+        {
+            base.Given();
+            _startPageReference = ContentRepository
+                .Publish<StartPage>(ContentReference.RootPage, p => p.MainBody = "Hejhej!");
+        }
+
+        public override void When()
+        {
+            base.When();
+
+            var startPage = ContentRepository.Get<StartPage>(_startPageReference);
+            startPage.MainBody = "An edited mainbody";
+        }
+
+        [Test]
+        public void it_should_not_return_a_value_set_when_page_is_not_saved_afterwards()
+        {
+            ContentRepository
+                .Get<StartPage>(_startPageReference)
+                .MainBody
+                .ShouldBe("Hejhej!");
+        }
     }
 }
