@@ -111,7 +111,7 @@ namespace WhiteMagic.Tests
 
         public IEnumerable<T> GetChildren<T>(ContentReference contentLink, ILanguageSelector selector, int startIndex, int maxRows) where T : IContentData
         {
-            return GetChildren(contentLink.ToPageReference(), -1, -1).OfType<T>();
+            return GetChildren(contentLink.ToPageReference(), startIndex, maxRows).OfType<T>();
         }
 
         public IEnumerable<ContentReference> GetDescendents(ContentReference contentLink)
@@ -187,23 +187,25 @@ namespace WhiteMagic.Tests
 
         private PageDataCollection GetChildren(PageReference pageLink, int startIndex, int maxRows)
         {
-            List<IContent> children = new List<IContent>();
+            var children = new List<IContent>();
 
-            ChildrenEventArgs args = new ChildrenEventArgs(pageLink, children);
-            try
+            List<PageReference> childrenRefs;
+            if (_structure.TryGetValue(pageLink, out childrenRefs))
             {
-                List<PageReference> childrenRefs;
-                if (_structure.TryGetValue(pageLink, out childrenRefs))
+                if (startIndex > -1)
                 {
-                    foreach (PageReference link in childrenRefs)
-                    {
-                        children.Add(GetPage(link));
-                    }
+                    childrenRefs = new List<PageReference>(childrenRefs.Skip(startIndex));
                 }
-            }
-            catch
-            {
-                
+
+                if (maxRows > -1)
+                {
+                    childrenRefs = new List<PageReference>(childrenRefs.Take(maxRows));
+                }
+
+                foreach (PageReference link in childrenRefs)
+                {
+                    children.Add(GetPage(link));
+                }
             }
             
             return new PageDataCollection(children);
