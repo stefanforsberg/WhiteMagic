@@ -8,7 +8,6 @@ using EPiServer.DataAccess;
 using EPiServer.Security;
 using EPiServer.SpecializedProperties;
 using EPiServer.Web;
-using StructureMap;
 
 namespace WhiteMagic.Tests
 {
@@ -137,27 +136,16 @@ namespace WhiteMagic.Tests
 
         public void Delete(ContentReference pageLink, bool forceDelete, AccessLevel access)
         {
-            PageEventArgs args = new PageEventArgs(pageLink);
-            RaisePageEvent(DeletingPage, args);
-            RaisePageEvent(DeletedPage, args);
-
             throw new NotImplementedException();
         }
 
         public void DeleteLanguageBranch(ContentReference pageLink, string languageBranch, AccessLevel access)
         {
-            PageEventArgs args = new PageEventArgs(pageLink);
-            RaisePageEvent(DeletingPageLanguage, args);
-            RaisePageEvent(DeletedPageLanguage, args);
-
             throw new NotImplementedException();
         }
 
         public void Move(ContentReference pageLink, ContentReference destinationLink, AccessLevel requiredSourceAccess, AccessLevel requiredDestinationAccess)
         {
-            PageEventArgs pageArgs = new PageEventArgs(pageLink, destinationLink);
-            RaisePageEvent(MovingPage, pageArgs);
-
             var page = GetPage(pageLink.ToPageReference()).CreateWritableClone();
 
             _structure[page.ParentLink].Remove(pageLink.ToPageReference());
@@ -173,8 +161,6 @@ namespace WhiteMagic.Tests
             {
                 _structure[destinationLink.ToPageReference()].Add(page.PageLink);
             }
-
-            RaisePageEvent(MovedPage, pageArgs); ;
         }
 
         public void MoveToWastebasket(ContentReference contentLink, string deletedBy)
@@ -206,8 +192,6 @@ namespace WhiteMagic.Tests
             ChildrenEventArgs args = new ChildrenEventArgs(pageLink, children);
             try
             {
-
-                RaiseChildrenEvent(LoadingChildren, args);
                 List<PageReference> childrenRefs;
                 if (_structure.TryGetValue(pageLink, out childrenRefs))
                 {
@@ -219,12 +203,9 @@ namespace WhiteMagic.Tests
             }
             catch
             {
-                RaiseChildrenEvent(FailedLoadingChildren, args);
-                throw;
+                
             }
-
-            RaiseChildrenEvent(LoadedChildren, args);
-            RaiseChildrenEvent(FinishedLoadingChildren, args);
+            
             return new PageDataCollection(children);
         }
 
@@ -236,52 +217,31 @@ namespace WhiteMagic.Tests
         public TPageData GetDefaultPageData<TPageData>(PageReference parentPageLink)
             where TPageData : IContentData
         {
-            PageEventArgs args = new PageEventArgs(parentPageLink);
-            RaisePageEvent(LoadingDefaultPageData, args);
-
-            var emptyPage = ConstructContentData<TPageData>(String.Empty, parentPageLink);
-
-            RaisePageEvent(LoadedDefaultPageData, new PageEventArgs(emptyPage as PageData));
-
-            return emptyPage;
+            return ConstructContentData<TPageData>(String.Empty, parentPageLink);
         }
 
         private PageDataCollection GetLanguageBranches(PageReference pageLink)
         {
-            PageDataCollection languages = new PageDataCollection();
+            var languages = new PageDataCollection();
             languages.Add(GetPage(pageLink));
             return languages;
         }
 
         private PageData GetPage(PageReference pageLink, ILanguageSelector selector)
         {
-            RaisePageEvent(LoadingPage, new PageEventArgs(pageLink));
-
             PageData page = null;
-            try
+            List<PageData> pages;
+            if (!_pages.TryGetValue(pageLink, out pages))
             {
-                List<PageData> pages;
-                if (!_pages.TryGetValue(pageLink, out pages))
-                {
-                    throw new PageNotFoundException(pageLink);
-                }
-                page = pages.Last();
-                LanguageSelector ls = selector as LanguageSelector;
-                if (ls != null && !String.IsNullOrEmpty(ls.LanguageBranch))
-                {
-                    page = pages.Find(p => p.LanguageBranch == ls.LanguageBranch);
-                }
+                throw new PageNotFoundException(pageLink);
             }
-            catch
+            page = pages.Last();
+            LanguageSelector ls = selector as LanguageSelector;
+            if (ls != null && !String.IsNullOrEmpty(ls.LanguageBranch))
             {
-                RaisePageEvent(FailedLoadingPage, new PageEventArgs(pageLink));
-                throw;
+                page = pages.Find(p => p.LanguageBranch == ls.LanguageBranch);
             }
-
-            PageEventArgs pageArgs = new PageEventArgs(page);
-            RaisePageEvent(LoadedPage, pageArgs);
-            RaisePageEvent(FinishedLoadingPage, pageArgs);
-
+            
             return page;
         }
 
@@ -305,61 +265,38 @@ namespace WhiteMagic.Tests
                 page.PageGuid = Guid.NewGuid();
             }
 
-            PageEventArgs pageArgs = new PageEventArgs(page);
-            RaisePageEvent(SavingPage, pageArgs);
-
-            if (!_pages.ContainsKey(page.PageLink))
-            {
-                RaisePageEvent(CreatingPage, pageArgs);
-            }
-
+            
             if ((action & SaveAction.CheckIn) == SaveAction.CheckIn)
             {
-                RaisePageEvent(CheckingInPage, pageArgs);
-
                 page["PagePendingPublish"] = true;
-
-                RaisePageEvent(CheckedInPage, pageArgs);
             }
 
             if ((action & SaveAction.Publish) == SaveAction.Publish)
             {
-                RaisePageEvent(PublishingPage, pageArgs);
-
                 page["PagePendingPublish"] = false;
                 page["PageWorkStatus"] = VersionStatus.Published;
                 page.Changed = DateTime.Now;
-
-                RaisePageEvent(PublishedPage, pageArgs);
             }
 
             if ((action & SaveAction.ForceCurrentVersion) == SaveAction.ForceCurrentVersion)
             {
-                RaisePageEvent(PublishingPage, pageArgs);
-
                 page["PagePendingPublish"] = false;
                 page["PageWorkStatus"] = VersionStatus.Published;
                 page.Changed = DateTime.Now;
-
-                RaisePageEvent(PublishedPage, pageArgs);
             }
 
             if ((action & SaveAction.ForceNewVersion) == SaveAction.ForceNewVersion)
             {
-                RaisePageEvent(PublishingPage, pageArgs);
-
                 page["PagePendingPublish"] = false;
                 page["PageWorkStatus"] = VersionStatus.Published;
                 page.Changed = DateTime.Now;
-
-                RaisePageEvent(PublishedPage, pageArgs);
             }
 
             try
             {
                 if (String.IsNullOrEmpty(page.LinkURL))
                 {
-                    page.LinkURL = "/templates/Page.aspx?id=" + page.PageLink.ToString();
+                    page.LinkURL = "/templates/Page.aspx?id=" + page.PageLink;
                 }
             }
             catch
@@ -370,12 +307,10 @@ namespace WhiteMagic.Tests
             if (!_pages.ContainsKey(page.PageLink))
             {
                 _pages[page.PageLink] = new List<PageData>();
-                RaisePageEvent(CreatedPage, pageArgs);
             }
 
             _pages[page.PageLink].Add(page);
 
-            RaisePageEvent(SavedPage, pageArgs);
 
             if (!PageReference.IsNullOrEmpty(page.ParentLink))
             {
@@ -405,22 +340,6 @@ namespace WhiteMagic.Tests
                 throw new PageNotFoundException(pageLink);
             }
             return pages.Last().Copy();
-        }
-
-        private void RaisePageEvent(PageEventHandler pageEvent, PageEventArgs e)
-        {
-            if (pageEvent != null)
-            {
-                pageEvent(this, e);
-            }
-        }
-
-        private void RaiseChildrenEvent(ChildrenEventHandler childrenEvent, ChildrenEventArgs e)
-        {
-            if (childrenEvent != null)
-            {
-                childrenEvent(this, e);
-            }
         }
 
         private TPageData ConstructContentData<TPageData>(string pageName, PageReference parentLink)
@@ -497,61 +416,10 @@ namespace WhiteMagic.Tests
             }
         }
 
-        #region Events
-        public event PageEventHandler LoadingPage;
-
-        public event PageEventHandler LoadedPage;
-
-        public event PageEventHandler FinishedLoadingPage;
-
-        public event PageEventHandler FailedLoadingPage;
-
-        public event PageEventHandler LoadingDefaultPageData;
-
-        public event PageEventHandler LoadedDefaultPageData;
-
-        public event PageEventHandler PublishingPage;
-
-        public event PageEventHandler PublishedPage;
-
-        public event PageEventHandler CheckingInPage;
-
-        public event PageEventHandler CheckedInPage;
-
-        public event PageEventHandler DeletingPage;
-
-        public event PageEventHandler DeletedPage;
-
-        public event PageEventHandler DeletingPageLanguage;
-
-        public event PageEventHandler DeletedPageLanguage;
-
-        public event PageEventHandler MovingPage;
-
-        public event PageEventHandler MovedPage;
-
-        public event PageEventHandler CreatingPage;
-
-        public event PageEventHandler CreatedPage;
-
-        public event PageEventHandler SavingPage;
-
-        public event PageEventHandler SavedPage;
-
-        public event ChildrenEventHandler LoadingChildren;
-
-        public event ChildrenEventHandler LoadedChildren;
-
-        public event ChildrenEventHandler FinishedLoadingChildren;
-
-        public event ChildrenEventHandler FailedLoadingChildren;
-
-        #endregion
-
         //Helper method to cast from PageData to T (if possible else null)
         private T EnsureTOrNull<T>(PageData page)
         {
-            return new PageData[] { page }.OfType<T>().FirstOrDefault();
+            return new[] { page }.OfType<T>().FirstOrDefault();
         }
     }
 
