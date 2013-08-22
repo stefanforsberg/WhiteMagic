@@ -127,6 +127,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EPiServer.CMS.Core.7.0.586.4\lib\EPiServer.XmlRpc.dll</HintPath>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.1.2.10\lib\2.0\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -150,6 +153,7 @@
   <ItemGroup>
     <Compile Include="ContentExtensions.cs" />
     <Compile Include="ContentRepositoryExtensions.cs" />
+    <Compile Include="ContentRepository\when_getting_children_using_startindex_and_maxrows.cs" />
     <Compile Include="InMemoryContentRepository.cs" />
     <Compile Include="InMemoryPermanentLinkMapper.cs" />
     <Compile Include="Pages\StandardPage.cs" />
