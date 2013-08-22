@@ -21,7 +21,7 @@ namespace WhiteMagic.Tests
             return contentRepository
                 .GetDefault<T>(parent)
                 .With(setValues)
-                .Publish(contentRepository);
+                .SaveAndPublish(contentRepository);
         }
 
         public static void CreateSystemPages(this IContentRepository contentRepository)
