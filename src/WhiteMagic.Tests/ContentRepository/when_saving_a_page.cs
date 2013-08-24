@@ -63,7 +63,7 @@ namespace WhiteMagic.Tests.ContentRepository
         }
     }
 
-    public class when_editing_an_existing_page_and_then_save_it : TestBase
+    public class when_editing_an_existing_page_and_then_saveing_it : TestBase
     {
         private PageReference _startPageReference;
 

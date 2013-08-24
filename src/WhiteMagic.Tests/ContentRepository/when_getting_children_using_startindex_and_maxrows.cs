@@ -36,19 +36,19 @@ namespace WhiteMagic.Tests.ContentRepository
         }
 
         [Test]
-        public void it_should_return_the_expected_page()
-        {
-            Children.First().PageName.ShouldBe("ChildPage2");
-        }
-
-        [Test]
         public void it_should_only_return_one_page()
         {
             Children.Count().ShouldBe(1);
         }
+
+        [Test]
+        public void it_should_return_the_expected_pagse()
+        {
+            Children.First().PageName.ShouldBe("ChildPage2");
+        }
     }
 
-    public class when_skipping_two_pagse_and_getting_two_pages : when_getting_children_using_startindex_and_maxrows
+    public class when_skipping_two_pages_and_getting_two_pages : when_getting_children_using_startindex_and_maxrows
     {
         public override void When()
         {
@@ -58,16 +58,16 @@ namespace WhiteMagic.Tests.ContentRepository
         }
 
         [Test]
-        public void it_should_return_the_expected_page()
-        {
-            Children.First().PageName.ShouldBe("ChildPage3");
-            Children.Last().PageName.ShouldBe("ChildPage4");
-        }
-
-        [Test]
         public void it_should_return_two_pages()
         {
             Children.Count().ShouldBe(2);
+        }
+
+        [Test]
+        public void it_should_return_the_expected_pages()
+        {
+            Children.First().PageName.ShouldBe("ChildPage3");
+            Children.Last().PageName.ShouldBe("ChildPage4");
         }
     }
 }
