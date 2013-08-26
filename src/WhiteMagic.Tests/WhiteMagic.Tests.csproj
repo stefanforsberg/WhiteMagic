@@ -153,6 +153,7 @@
   <ItemGroup>
     <Compile Include="ContentExtensions.cs" />
     <Compile Include="ContentRepositoryExtensions.cs" />
+    <Compile Include="ContentRepository\when_creating_a_page.cs" />
     <Compile Include="ContentRepository\when_getting_children_using_startindex_and_maxrows.cs" />
     <Compile Include="ContentRepository\when_a_page_exists_in_multiple_languages.cs" />
     <Compile Include="InMemoryContentRepository.cs" />

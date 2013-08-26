@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using EPiServer;
 using EPiServer.Core;
@@ -386,8 +387,16 @@ namespace WhiteMagic.Tests
 
             if (page is PageData)
             {
-                AddPageDataProperties(page as PageData, pageName, pageLink, parentLink);
-                InitBlocks(page as PageData);
+                var pageData = page as PageData;
+
+                AddPageDataProperties(pageData, pageName, pageLink, parentLink);
+                InitBlocks(pageData);
+
+                if (!pageData.ExistingLanguages.Any())
+                {
+                    pageData.ExistingLanguages = new[] {CultureInfo.GetCultureInfo(language)};
+                }
+
             }
 
             return (TPageData)page;
