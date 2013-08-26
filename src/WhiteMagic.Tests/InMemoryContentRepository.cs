@@ -91,12 +91,12 @@ namespace WhiteMagic.Tests
 
         public T Get<T>(ContentReference contentLink) where T : IContentData
         {
-            return EnsureTOrNull<T>(GetPage(contentLink.ToPageReference()));
+            return EnsureTOrThrow<T>(GetPage(contentLink.ToPageReference()));
         }
 
         public T Get<T>(ContentReference contentLink, ILanguageSelector selector) where T : IContentData
         {
-            return EnsureTOrNull<T>(GetPage(contentLink.ToPageReference(), selector));
+            return EnsureTOrThrow<T>(GetPage(contentLink.ToPageReference(), selector));
         }
 
         public IEnumerable<T> GetChildren<T>(ContentReference contentLink) where T : IContentData
@@ -419,9 +419,20 @@ namespace WhiteMagic.Tests
         }
 
         //Helper method to cast from PageData to T (if possible else null)
+
         private T EnsureTOrNull<T>(PageData page)
         {
             return new[] { page }.OfType<T>().FirstOrDefault();
+        }
+
+        private T EnsureTOrThrow<T>(PageData page)
+        {
+            if (page is T)
+            {
+                return EnsureTOrNull<T>(page);
+            };
+
+            throw new TypeMismatchException();
         }
     }
 
