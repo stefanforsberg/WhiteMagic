@@ -1,5 +1,6 @@
 ﻿using EPiServer.Core;
 using NUnit.Framework;
+using Shouldly;
 using WhiteMagic.Tests.Pages;
 
 namespace WhiteMagic.Tests.ContentRepository
@@ -12,7 +13,23 @@ namespace WhiteMagic.Tests.ContentRepository
         {
             base.Given();
             StartPageReference = ContentRepository
-                .Publish<StartPage>(ContentReference.RootPage, p => p.MainBody = "Hejhej!");
+                .Publish<StartPage>(ContentReference.RootPage, "StartPage");
+        }
+    }
+
+    public class when_getting_a_page_with_base_type_constraint : when_getting_a_page
+    {
+        private PageData _page;
+
+        public override void When()
+        {
+            _page = ContentRepository.Get<PageData>(StartPageReference);
+        }
+
+        [Test]
+        public void it_should_return_a_page_typed_to_the_base_type()
+        {
+            _page.PageName.ShouldBe("StartPage");
         }
     }
 

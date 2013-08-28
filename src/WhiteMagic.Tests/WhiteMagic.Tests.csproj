@@ -161,7 +161,7 @@
     <Compile Include="Pages\StartPage.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ContentRepository\when_getting_children_by_page_type.cs" />
+    <Compile Include="ContentRepository\when_getting_children.cs" />
     <Compile Include="ContentRepository\when_moving_a_page.cs" />
     <Compile Include="ContentRepository\when_saving_a_page.cs" />
   </ItemGroup>

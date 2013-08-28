@@ -207,6 +207,10 @@ namespace WhiteMagic.Tests
                     children.Add(GetPage(link));
                 }
             }
+            else
+            {
+                throw new PageNotFoundException(pageLink);                
+            }
             
             return new PageDataCollection(children);
         }
