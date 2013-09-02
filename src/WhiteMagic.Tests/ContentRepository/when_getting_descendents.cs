@@ -37,7 +37,7 @@ namespace WhiteMagic.Tests.ContentRepository
         }
     }
 
-    public class when_getting_descendents_from_start_page : when_getting_descendents
+    public class when_getting_descendents_from_root_page : when_getting_descendents
     {
         public override void When()
         {
