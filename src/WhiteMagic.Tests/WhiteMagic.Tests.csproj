@@ -153,8 +153,10 @@
   <ItemGroup>
     <Compile Include="ContentExtensions.cs" />
     <Compile Include="ContentRepositoryExtensions.cs" />
+    <Compile Include="ContentRepository\when_getting_ancestors.cs" />
     <Compile Include="ContentRepository\when_getting_a_page.cs" />
     <Compile Include="ContentRepository\when_getting_children_using_startindex_and_maxrows.cs" />
+    <Compile Include="ContentRepository\when_getting_descendents.cs" />
     <Compile Include="InMemoryContentRepository.cs" />
     <Compile Include="InMemoryPermanentLinkMapper.cs" />
     <Compile Include="Pages\StandardPage.cs" />

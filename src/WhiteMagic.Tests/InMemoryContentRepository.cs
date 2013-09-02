@@ -116,12 +116,35 @@ namespace WhiteMagic.Tests
 
         public IEnumerable<ContentReference> GetDescendents(ContentReference contentLink)
         {
-            throw new NotImplementedException();
+            var descendents = new List<ContentReference>();
+
+            foreach (var child in GetChildren<IContent>(contentLink))
+            {
+                descendents.Add(child.ContentLink);
+                descendents.AddRange(GetDescendents(child.ContentLink));
+            }
+
+            return descendents;
         }
 
         public IEnumerable<IContent> GetAncestors(ContentReference contentLink)
         {
-            throw new NotImplementedException();
+            if (contentLink.CompareToIgnoreWorkID(ContentReference.RootPage))
+            {
+                yield break;
+            }
+
+            var parent = Get<IContent>(Get<IContent>(contentLink.ToPageReference()).ParentLink);
+            
+            yield return parent;
+
+            if (!parent.ContentLink.CompareToIgnoreWorkID(ContentReference.RootPage))
+            {
+                foreach (var ancestor in GetAncestors(parent.ContentLink))
+                {
+                    yield return ancestor;
+                }
+            }
         }
 
         public IEnumerable<IContent> GetItems(IEnumerable<ContentReference> contentLinks, ILanguageSelector selector)
@@ -189,6 +212,11 @@ namespace WhiteMagic.Tests
         {
             var children = new List<IContent>();
 
+            if (!_pages.ContainsKey(pageLink))
+            {
+                throw new PageNotFoundException(pageLink); 
+            }
+            
             List<PageReference> childrenRefs;
             if (_structure.TryGetValue(pageLink, out childrenRefs))
             {
@@ -207,11 +235,7 @@ namespace WhiteMagic.Tests
                     children.Add(GetPage(link));
                 }
             }
-            else
-            {
-                throw new PageNotFoundException(pageLink);                
-            }
-            
+
             return new PageDataCollection(children);
         }
 

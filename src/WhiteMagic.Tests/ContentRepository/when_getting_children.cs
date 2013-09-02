@@ -81,4 +81,35 @@ namespace WhiteMagic.Tests.ContentRepository
             Assert.Throws<PageNotFoundException>(() => ContentRepository.GetChildren<PageData>(new ContentReference(1000)));
         }
     }
+
+    public class when_getting_children_of_a_page_that_has_no_children : TestBase
+    {
+        private PageReference _startPageReference;
+        private PageReference _childPage1Reference;
+        private IEnumerable<StandardPage> _children;
+
+        public override void Given()
+        {
+            base.Given();
+
+            _startPageReference = ContentRepository.Publish<StartPage>(ContentReference.RootPage);
+
+            //_childPage1Reference = ContentRepository.Publish<StandardPage>(_startPageReference, "ChildPage1");
+            //ContentRepository.Publish<StandardPage>(_startPageReference, "ChildPage2");
+            //ContentRepository.Publish<StandardPage>(_startPageReference, "ChildPage3");
+            //ContentRepository.Publish<StandardPage>(_childPage1Reference, "ChildPage1-ChildPage1");
+        }
+
+        public override void When()
+        {
+            base.When();
+            _children = ContentRepository.GetChildren<StandardPage>(_startPageReference);
+        }
+
+        [Test]
+        public void it_should_not_return_any_children()
+        {
+            _children.Count().ShouldBe(0);
+        }
+    }
 }
